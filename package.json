@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "node-express-mongo-boilerplate",
+  "name": "node-express-mongo-boilerplate-js",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
