@@ -1,6 +1,17 @@
-# Node Express MongoDB Boilerplate
+# Node Express MongoDB JS Boilerplate
 
-A boilerplate Node.js project structured as a REST API using Express and MongoDB, complete with CRUD operations for a feedback feature. This project integrates validation, error handling, and documentation with Swagger.
+A comprehensive boilerplate for a Node.js project, architected as a REST API utilizing Express and MongoDB. This boilerplate features full CRUD operations for a feedback system and seamlessly integrates data validation, robust error handling, and comprehensive API documentation via Swagger.
+
+## Tech Stack
+
+<img src="https://img.icons8.com/?size=512&id=108784&format=png" alt="javascript Logo" width="50" height="50">
+<img src="https://img.icons8.com/?size=256&id=hsPbhkOH4FMe&format=png" alt="Node.js Logo" width="50" height="50">
+<img src="https://img.icons8.com/?size=256&id=kg46nzoJrmTR&format=png" alt="Express Logo" width="50" height="50">
+<img src="https://img.icons8.com/?size=256&id=74402&format=png" alt="MongoDB Logo" width="50" height="50">
+<img src="https://img.icons8.com/?size=256&id=rHpveptSuwDz&format=png" alt="JWT Logo" width="50" height="50">
+<img src="https://img.icons8.com/?size=256&id=rdKV2dee9wxd&format=png" alt="Swagger Logo" width="50" height="50">
+<img src="https://prettier.io/icon.png" alt="Prettier Logo" width="50" height="50">
+<img src="https://img.icons8.com/?size=256&id=RBnCyho7WRn7&format=png" alt="ESLint Logo" width="50" height="50">
 
 ## Table of Contents
 
@@ -13,8 +24,8 @@ A boilerplate Node.js project structured as a REST API using Express and MongoDB
 - [Project Structure](#project-structure)
 - [API Endpoints](#api-endpoints)
   - [Feedback API](#feedback-api)
+  - [Auth API](#auth-api)
   - [Swagger Documentation](#swagger-documentation)
-- [Badges](#badges)
 - [Author](#author)
 - [License](#license)
 
@@ -27,6 +38,11 @@ A boilerplate Node.js project structured as a REST API using Express and MongoDB
 - **API Documentation** with Swagger
 - **Environment Configuration** via dotenv
 - **Code Quality** tools: ESLint and Prettier
+- **User Authentication** with JSON Web Tokens (JWT)
+- **Authorization Middleware** for role-based access control
+- **Password Hashing** using bcrypt for secure password management
+- **Session Management** using MongoDB TTL (Time-To-Live) indexes for automatic session expiration
+
 
 ## Prerequisites
 
@@ -59,6 +75,9 @@ A boilerplate Node.js project structured as a REST API using Express and MongoDB
     ```env
     PORT=5000
     MONGO_URI=<your_mongo_connection_string>
+    NODE_ENV="development"
+    JWT_SECRET=<your secret string>
+    SESSION_EXP_SECS=<session expiry in secs>
     ```
 
 ### Running the Server
@@ -82,42 +101,60 @@ The server will start on `http://localhost:5000` by default.
 
 ## Project Structure
 
-```plaintext
+```bash
 .
-├── .env                  # Environment configuration file
-├── .gitignore            # Git ignore file
-├── .prettierrc           # Prettier configuration
-├── eslint.config.js      # ESLint configuration
-├── package.json          # Project metadata and dependencies
-├── README.md             # Project documentation
+├── .env                     # Environment configuration file
+├── .gitignore               # Git ignore file
+├── .prettierrc              # Prettier configuration
+├── eslint.config.js         # ESLint configuration
+├── LICENSE                  # License file
+├── package-lock.json        # Exact versions of npm dependencies
+├── package.json             # Project metadata and dependencies
+├── README.md                # Project documentation
 └── src
-    ├── app.js            # Main application entry point
+    ├── app.js               # Main application entry point
     ├── config
-    │   └── db.js         # Database connection setup
+    │   ├── db.js            # Database connection setup
+    │   └── swagger.js       # Swagger configuration
     ├── controllers
-    │   └── feedbackController.js  # Feedback API controller logic
+    │   ├── authController.js    # Authentication controller logic
+    │   └── feedbackController.js # Feedback API controller logic
     ├── middleware
-    │   └── errorHandler.js  # Error handling middleware
+    │   ├── authMiddleware.js   # Authentication middleware
+    │   └── errorHandler.js     # Error handling middleware
     ├── models
-    │   └── Feedback.js   # Mongoose model for feedback
+    │   ├── Feedback.js        # Mongoose model for feedback
+    │   ├── Session.js         # Mongoose model for sessions
+    │   └── User.js            # Mongoose model for users
     ├── routes
-    │   └── feedbackRoutes.js # Routes for feedback API endpoints
-    └── swagger
-        └── swagger.json  # Swagger API documentation configuration
+    │   ├── authRoutes.js      # Routes for authentication API endpoints
+    │   └── feedbackRoutes.js  # Routes for feedback API endpoints
+    └── utils
+        └── helper.js         # Utility functions
 ```
 
 ## API Endpoints
 
 ### Feedback API
 
-| Method | Endpoint            | Description                         |
-|--------|----------------------|-------------------------------------|
-| GET    | `/api/feedback`      | Retrieve all feedback              |
-| POST   | `/api/feedback`      | Add new feedback                   |
-| GET    | `/api/feedback/:id`  | Retrieve specific feedback by ID   |
-| PUT    | `/api/feedback/:id`  | Update feedback by ID              |
-| DELETE | `/api/feedback/:id`  | Delete feedback by ID              |
+| Method | Endpoint             | Description                      |
+|--------|----------------------|----------------------------------|
+| <span pill get></span>    | `/api/feedback`        | Retrieve all feedback            |
+| <span pill get></span>    | `/api/feedback/:id`    | Retrieve specific feedback by ID |
+| <span pill post></span>   | `/api/feedback`        | Add new feedback                 |
+| <span pill put></span>    | `/api/feedback/:id`    | Update feedback by ID            |
+| <span pill del></span> | `/api/feedback/:id`    | Delete feedback by ID            |
 
+### Auth API
+
+| Method | Endpoint               | Description                      |
+|--------|------------------------|----------------------------------|
+| <span pill post></span>   | `/api/auth/register`     | Register a new user              |
+| <span pill post></span>   | `/api/auth/login`        | Login a user                     |
+| <span pill post></span>   | `/api/auth/logout`       | Logout a user                    |
+| <span pill get></span>    | `/api/auth/verify-token` | Verify a user's token            |
+
+---
 ### Swagger Documentation
 
 Access the API documentation at: `http://localhost:5000/api-docs`
@@ -127,9 +164,48 @@ Access the API documentation at: `http://localhost:5000/api-docs`
 
 Taimoor Qureshi - [My Portfolio or Contact Information](taimooralqureshi.github.io)
 
-
-## License
-
 ## License
 
 This project is licensed under the MIT License. 
+
+<style>
+   [pill] {
+      padding: 0px 4px 2px;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+   }
+
+   /* Request Types */
+   [get] {
+      background-color: palegreen;
+   }
+
+   [get]::after {
+      content: "GET"; 
+   }
+
+   [post] {
+      background-color: skyblue;
+   }
+
+   [post]::after {
+      content: "POST";
+   }
+
+   [put] {
+      background-color: gold;
+   }
+
+   [put]::after {
+      content: "PUT";
+   }
+
+   [del] {
+      background-color: tomato;
+   }
+
+   [del]::after {
+      content: "DELETE";
+   }
+</style>

@@ -11,7 +11,7 @@ export const getAllFeedback = async (req, res, next) => {
       data: feedback,
     });
   } catch (error) {
-    next(createError(500, 'Failed to fetch feedback'));
+    next(error);
   }
 };
 
@@ -26,18 +26,7 @@ export const createFeedback = async (req, res, next) => {
       data: newFeedback,
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((err) => ({
-        field: err.path,
-        message: err.message,
-      }));
-      return res.status(400).json({
-        status: 400,
-        message: 'Validation failed',
-        errors,
-      });
-    }
-    next(createError(500, 'Failed to create feedback'));
+    next(error);
   }
 };
 
@@ -54,7 +43,7 @@ export const getFeedback = async (req, res, next) => {
       data: feedback,
     });
   } catch (error) {
-    next(createError(500, 'Failed to fetch feedback'));
+    next(error);
   }
 };
 
@@ -62,31 +51,28 @@ export const getFeedback = async (req, res, next) => {
 export const updateFeedback = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const updatedFeedback = await Feedback.findOneAndUpdate({ id }, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updateData = req.body;
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: 'Update data cannot be null' });
+    }
+    const updatedFeedback = await Feedback.findOneAndUpdate(
+      { id },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
     if (!updatedFeedback) {
       return next(createError(404, 'Feedback not found'));
     }
+
     res.status(200).json({
       status: 200,
       message: 'Feedback updated successfully',
       data: updatedFeedback,
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((err) => ({
-        field: err.path,
-        message: err.message,
-      }));
-      return res.status(400).json({
-        status: 400,
-        message: 'Validation failed',
-        errors,
-      });
-    }
-    next(createError(500, 'Failed to update feedback'));
+    next(error);
   }
 };
 
@@ -102,6 +88,6 @@ export const deleteFeedback = async (req, res, next) => {
       message: 'Feedback deleted successfully',
     });
   } catch (error) {
-    next(createError(500, 'Failed to delete feedback'));
+    next(error);
   }
 };
